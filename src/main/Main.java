@@ -20,7 +20,7 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception{
+    public void start(Stage stage) throws Exception {
         Group root = new Group();
         Scene scene = new Scene(root, 640, 480, Color.WHITE);
         Canvas cvs = new Canvas(640, 480);
@@ -53,7 +53,7 @@ public class Main extends Application {
             gameManager.draw();
 
             g.setFill(Color.BLACK);
-            g.fillText("fps: " + (float)frames / elapseTime * 1000, 20, 20);
+            g.fillText("fps: " + (float) frames / elapseTime * 1000, 20, 20);
         }
     }
 }
