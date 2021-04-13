@@ -23,7 +23,6 @@ public class Server {
 //                    System.out.println("Echoing: " + str);
 //                    out.println(str);
                 System.out.println("yes");
-                gameManager.init();
                 gameManager.start();
                 System.out.println("closing: " + socket);
             } catch (InterruptedException e) {
