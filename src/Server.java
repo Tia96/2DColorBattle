@@ -1,33 +1,32 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Server {
     public final int PORT = 60040;
+    private List<Socket> sockets = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Server server = new Server();
         server.connect();
+        server.start();
     }
 
     private void connect() throws IOException {
-        try (ServerSocket s = new ServerSocket(PORT)) {
-            System.out.println("Started: " + s);
-            try (Socket socket = s.accept()) {
-                System.out.println("Connection accepted: " + socket);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                GameManager gameManager = GameManager.getInstance();
-//                    String str = in.readLine();
-//                    if(str.equals("END")) break;
-//                    System.out.println("Echoing: " + str);
-//                    out.println(str);
-                System.out.println("yes");
-                gameManager.start();
-                System.out.println("closing: " + socket);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        System.out.println("Server accepting");
+        ServerSocket s = new ServerSocket(PORT);
+        while(sockets.size() < 2){
+            Socket socket = s.accept();
+            System.out.println("Connect: " + socket);
+            sockets.add(socket);
         }
+    }
+
+    private void start() throws IOException, InterruptedException {
+        GameManager gameManager = GameManager.getInstance((Socket[]) sockets.toArray());
+        gameManager.start();
     }
 }
