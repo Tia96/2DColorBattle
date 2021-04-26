@@ -6,14 +6,13 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
     private GameManager gameManager;
-    private GraphicsContext g;
+    private GraphicsContext graphic;
 
     public static void main(String[] args) {
         launch(args);
@@ -25,35 +24,35 @@ public class Main extends Application {
         Scene scene = new Scene(root, 640, 480, Color.WHITE);
         Canvas cvs = new Canvas(640, 480);
         root.getChildren().add(cvs);
-        this.g = cvs.getGraphicsContext2D();
+        scene.setOnKeyPressed(GameHelper::keyPressedHandler);
+        scene.setOnKeyReleased(GameHelper::keyReleasedHandler);
+        graphic = cvs.getGraphicsContext2D();
 
         stage.setTitle("Splatoon2D");
         stage.setScene(scene);
         stage.show();
 
-        gameManager = GameManager.getInstance(this.g);
-        scene.setOnKeyPressed(GameHelper::keyPressedHandler);
-        scene.setOnKeyReleased(GameHelper::keyReleasedHandler);
+        SnapShot snapshot = new SnapShot();
+        gameManager = GameManager.getInstance(graphic, snapshot);
 
         new Animation().start();
     }
 
     private class Animation extends AnimationTimer {
         private long startTime = 0;
-        private long elapseTime = 0; //ms
         private int frames = 0;
 
         @Override
         public void handle(long now) {
             ++frames;
             if (startTime == 0) startTime = now;
-            elapseTime = (now - startTime) / 1000000;
+            long elapseTime = (now - startTime) / 1000000;
 
             gameManager.step();
             gameManager.draw();
 
-            g.setFill(Color.BLACK);
-            g.fillText("fps: " + (float) frames / elapseTime * 1000, 20, 20);
+            graphic.setFill(Color.BLACK);
+            graphic.fillText("fps: " + (float) frames / elapseTime * 1000, 20, 20);
         }
     }
 }
