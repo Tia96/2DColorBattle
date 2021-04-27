@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public class Network {
     public Socket[] sockets;
     private BufferedReader[] ins;
     private PrintWriter[] outs;
-    private List<Deque<String>> messageBoxes;
+    private List<Deque<String>> messageBoxes = new ArrayList<>();
 
     Network(Socket[] sockets) throws IOException {
         this.sockets = sockets;
@@ -20,7 +21,7 @@ public class Network {
         }
 
         for (int i = 0; i < sockets.length; ++i) {
-            messageBoxes.add(new ArrayDeque<String>());
+            messageBoxes.add(new ArrayDeque<>());
         }
     }
 
@@ -29,25 +30,30 @@ public class Network {
             while (true) {
                 String str = "";
                 try {
-                    str = ins[id].readLine();
                     while (!ins[id].ready()) ;
+                    str = ins[id].readLine();
+                    System.out.println("in: " + "ID: " + id + " " + str);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println(id + " " + str);
                 messageBoxes.get(id).push(str);
             }
         }).start();
     }
 
     public String getMessage(int id) {
-        return messageBoxes.get(id).pop();
+        if (messageBoxes.get(id).size() == 0) return "";
+        return messageBoxes.get(id).getFirst();
     }
 
     public void sendAll(String str) {
         for (int i = 0; i < sockets.length; ++i) {
             final int id = i;
-            new Thread(() -> outs[id].println(str)).start();
+            new Thread(() -> {
+                outs[id].println(str);
+                System.out.println("out: " + "ID: " + id + " " + str);
+            }
+            ).start();
         }
     }
 }

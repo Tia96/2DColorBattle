@@ -18,6 +18,7 @@ public class Server {
     private void connect() throws IOException {
         System.out.println("Server accepting");
         ServerSocket s = new ServerSocket(PORT);
+        int id = 0;
         while(sockets.size() < 2){
             Socket socket = s.accept();
             System.out.println("Connect: " + socket);
@@ -26,7 +27,7 @@ public class Server {
     }
 
     private void start() throws IOException, InterruptedException {
-        GameManager gameManager = GameManager.getInstance((Socket[]) sockets.toArray());
+        GameManager gameManager = GameManager.getInstance(sockets.toArray(new Socket[]{}));
         gameManager.start();
     }
 }

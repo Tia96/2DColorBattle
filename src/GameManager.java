@@ -10,7 +10,6 @@ public class GameManager {
     private final double targetFPS = 20.0;
 
     private int[][] stage;
-    private int gameLevel = 0;
 
     private GameManager() {
     }
@@ -36,21 +35,19 @@ public class GameManager {
         for (int id = 0; id < network.sockets.length; ++id) {
             network.startReceiveMessage(id);
         }
+        snapshot.gameLevel = 2;
 
-        int frames = 0;
-        long startTime = System.currentTimeMillis();
-        double targetFPSTime = 1000 / targetFPS;
+        FPSCounter fpsCounter = new FPSCounter();
+        fpsCounter.start();
+
         while (INSTANCE.gameLoop) {
-            long sT = System.currentTimeMillis();
-            ++frames;
+            fpsCounter.count_frame();
 
             snapshot.getSnapShot();
             updateWorld();
-            snapshot.sendSnapShot(0.0, gameLevel, stage);
+            snapshot.sendSnapShot(0.0, stage);
 
-            long elapsedTime = System.currentTimeMillis() - sT;
-            if (elapsedTime < targetFPSTime) Thread.sleep((long) (targetFPSTime - elapsedTime));
-            //System.out.println("fps: " + (double) frames / (System.currentTimeMillis() - startTime) * 1000);
+            System.out.println("fps: " + fpsCounter.getFPS());
         }
     }
 
@@ -59,19 +56,21 @@ public class GameManager {
     }
 
     private void drawStage() {
-        for (int id = 0; id < snapshot.player_num; ++id) {
-            SnapShot.Player player = snapshot.players[id];
-            int left = (int) player.position.getX();
-            int right = (int) Math.ceil(left + 2 * player.radius);
-            int top = (int) player.position.getY();
-            int bottom = (int) Math.ceil(top + 2 * player.radius);
-            for (int y = top; y <= bottom; ++y) {
-                for (int x = left; x <= right; ++x) {
-                    if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                    if (stage[y][x] == player.color) continue;
+        if (snapshot.gameLevel == 2) {
+            for (int id = 0; id < snapshot.player_num; ++id) {
+                SnapShot.Player player = snapshot.players[id];
+                int left = (int) player.position.getX();
+                int right = (int) Math.ceil(left + 2 * player.radius);
+                int top = (int) player.position.getY();
+                int bottom = (int) Math.ceil(top + 2 * player.radius);
+                for (int y = top; y <= bottom; ++y) {
+                    for (int x = left; x <= right; ++x) {
+                        if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
+                        if (stage[y][x] == player.color) continue;
 
-                    if (GameHelper.isCollideWithCircleAndRect(new Vector2(left + player.radius, top + player.radius), player.radius, new Vector2(x, y), new Vector2(1, 1))) {
-                        stage[y][x] = player.color;
+                        if (GameHelper.isCollideWithCircleAndRect(new Vector2(left + player.radius, top + player.radius), player.radius, new Vector2(x, y), new Vector2(1, 1))) {
+                            stage[y][x] = player.color;
+                        }
                     }
                 }
             }
