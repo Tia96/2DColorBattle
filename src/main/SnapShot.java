@@ -15,25 +15,37 @@ public class SnapShot {
     public int[][] stage;
     public int countDown;
     public int gameLevel = 0;
+    private int myID;
 
     public static class Player {
         public Point2D position;
-        public int radius;
-        public int color;
+        public double radius = 5.0;
+        public int color = 2;
     }
 
     SnapShot() {
         this.network = new Network();
-        network.connect(gameLevel);
+        network.connect(gameLevel, myID);
 
         player_num = 2;
         players = new Player[player_num];
+        for (int i = 0; i < player_num; ++i) {
+            players[i] = new Player();
+        }
+
+        stage = new int[480][];
+        for (int y = 0; y < 480; ++y) {
+            for (int x = 0; x < 640; ++x) {
+                stage[y] = new int[640];
+            }
+        }
         gameLevel = 0;
     }
 
     public void getSnapShot() {
         Gson gson = new Gson();
         String data = network.getMessage();
+        if (data.equals("")) return;
         Type type = new TypeToken<HashMap<String, String>>() {
         }.getType();
         Map<String, String> map = gson.fromJson(data, type);
@@ -52,6 +64,7 @@ public class SnapShot {
             }
 
             String stage_str = map.get("Stage");
+            if (stage_str.equals("")) return;
             for (int y = 0; y < 480; ++y) {
                 for (int x = 0; x < 640; ++x) {
                     stage[y][x] = Character.getNumericValue(stage_str.charAt(y * 640 + x));
@@ -67,6 +80,8 @@ public class SnapShot {
         String position = pos.getX() + "," + pos.getY() + ";";
         map.put("Position", position);
 
-        //network.send(map)
+        Gson gson = new Gson();
+        String sendData = gson.toJson(map);
+        network.send(sendData);
     }
 }

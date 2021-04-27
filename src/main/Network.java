@@ -12,9 +12,9 @@ public class Network {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private Deque<String> messageBox = new ArrayDeque<String>();
+    private Deque<String> messageBox = new ArrayDeque<>();
 
-    public void connect(Integer gameLevel) {
+    public void connect(Integer gameLevel, Integer myID) {
 //        new Thread(() -> {
 //            try {
 //                InetAddress addr = InetAddress.getByName("localhost");
@@ -30,8 +30,12 @@ public class Network {
 //        }).start();
 
         class InnerClass implements Runnable {
-            Integer tmp;
-            InnerClass(Integer tmp) {this.tmp = tmp;}
+            Integer gameLevel, myID;
+
+            InnerClass(Integer tmp, Integer tmp2) {
+                gameLevel = tmp;
+                myID = tmp2;
+            }
 
             @Override
             public void run() {
@@ -42,6 +46,8 @@ public class Network {
                         socket.connect(new InetSocketAddress(addr, PORT), 0);
                         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+
+                        myID = 0;
                         break;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -53,11 +59,12 @@ public class Network {
                     }
                 }
                 System.out.println("Connect: " + socket);
-                tmp = 1;
+                startReceiveMessage();
+                gameLevel = 1;
             }
         }
 
-        InnerClass i = new InnerClass(gameLevel);
+        InnerClass i = new InnerClass(gameLevel, myID);
         new Thread(i).start();
     }
 
@@ -66,8 +73,8 @@ public class Network {
             while (true) {
                 String str = "";
                 try {
-                    str = in.readLine();
                     while (!in.ready()) ;
+                    str = in.readLine();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -79,6 +86,14 @@ public class Network {
 
     public String getMessage() {
         if (messageBox.size() == 0) return "";
-        return messageBox.pop();
+        return messageBox.getFirst();
+    }
+
+    public void send(String str) {
+        new Thread(() -> {
+            out.println(str);
+            System.out.println("out: " + " " + str);
+        }
+        ).start();
     }
 }

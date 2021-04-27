@@ -13,13 +13,14 @@ public class Main extends Application {
 
     private GameManager gameManager;
     private GraphicsContext graphic;
+    private FPSCounter fpsCounter = new FPSCounter();
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         Group root = new Group();
         Scene scene = new Scene(root, 640, 480, Color.WHITE);
         Canvas cvs = new Canvas(640, 480);
@@ -35,24 +36,20 @@ public class Main extends Application {
         SnapShot snapshot = new SnapShot();
         gameManager = GameManager.getInstance(graphic, snapshot);
 
+        fpsCounter.start();
         new Animation().start();
     }
 
     private class Animation extends AnimationTimer {
-        private long startTime = 0;
-        private int frames = 0;
-
         @Override
         public void handle(long now) {
-            ++frames;
-            if (startTime == 0) startTime = now;
-            long elapseTime = (now - startTime) / 1000000;
+            fpsCounter.count_frame();
 
             gameManager.step();
             gameManager.draw();
 
             graphic.setFill(Color.BLACK);
-            graphic.fillText("fps: " + (float) frames / elapseTime * 1000, 20, 20);
+            graphic.fillText("fps: " + fpsCounter.getFPS(), 20, 20);
         }
     }
 }
