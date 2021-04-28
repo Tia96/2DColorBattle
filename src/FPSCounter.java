@@ -18,9 +18,7 @@ public class FPSCounter extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("counter: " + bef_counter + " " + counter);
             fps = (counter - bef_counter) / 2.0;
-            System.out.println(bef_counter);
         }
     }
 }

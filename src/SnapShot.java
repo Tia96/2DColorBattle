@@ -41,7 +41,7 @@ public class SnapShot {
         }
     }
 
-    public void sendSnapShot(Double time, int[][] stage) {
+    public void sendSnapShot(Double time) {
         HashMap<String, String> map = new HashMap<>();
         map.put("Time", time.toString());
         map.put("Player_num", Integer.toString(player_num));
@@ -56,13 +56,7 @@ public class SnapShot {
         }
         map.put("Position", position.toString());
 
-        StringBuilder stage_str = new StringBuilder();
-        for (int y = 0; y < stage.length; ++y) {
-            for (int x = 0; x < stage[0].length; ++x) {
-                //stage_str.append(stage[y][x]);
-            }
-        }
-        map.put("Stage", stage_str.toString());
+
 
         Gson gson = new Gson();
         String sendData = gson.toJson(map);

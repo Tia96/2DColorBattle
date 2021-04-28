@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameManager {
     private static final GameManager INSTANCE = new GameManager();
@@ -10,6 +12,7 @@ public class GameManager {
     private final double targetFPS = 20.0;
 
     private int[][] stage;
+    private List<String> stage_dif = new ArrayList<>();
 
     private GameManager() {
     }
@@ -40,13 +43,17 @@ public class GameManager {
         FPSCounter fpsCounter = new FPSCounter();
         fpsCounter.start();
 
+        double targetFPSTime = 1000 / targetFPS;
         while (INSTANCE.gameLoop) {
+            long startTime = System.currentTimeMillis();
             fpsCounter.count_frame();
 
             snapshot.getSnapShot();
             updateWorld();
-            snapshot.sendSnapShot(0.0, stage);
+            snapshot.sendSnapShot(0.0);
 
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            if (elapsedTime < targetFPSTime) Thread.sleep((long) (targetFPSTime - elapsedTime));
             System.out.println("fps: " + fpsCounter.getFPS());
         }
     }
