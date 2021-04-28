@@ -12,7 +12,6 @@ public class GameManager {
     private final double targetFPS = 20.0;
 
     private int[][] stage;
-    private List<String> stage_dif = new ArrayList<>();
 
     private GameManager() {
     }
@@ -34,6 +33,7 @@ public class GameManager {
 
     public void start() throws InterruptedException {
         init();
+        snapshot.sendFirstData();
         snapshot.sendGameStart();
         for (int id = 0; id < network.sockets.length; ++id) {
             network.startReceiveMessage(id);
@@ -59,10 +59,11 @@ public class GameManager {
     }
 
     private void updateWorld() {
-        drawStage();
+        updateStage();
+        collidePositions();
     }
 
-    private void drawStage() {
+    private void updateStage() {
         if (snapshot.gameLevel == 2) {
             for (int id = 0; id < snapshot.player_num; ++id) {
                 SnapShot.Player player = snapshot.players[id];
@@ -80,11 +81,23 @@ public class GameManager {
                         }
                     }
                 }
+
             }
         }
     }
 
-    private void collidePositions(Vector2[] positions) {
-
+    private void collidePositions() {
+        for (int id1 = 0; id1 < snapshot.player_num; ++id1) {
+            for (int id2 = id1 + 1; id2 < snapshot.player_num; ++id2) {
+                SnapShot.Player player1 = snapshot.players[id1], player2 = snapshot.players[id2];
+                int back = 1;
+                while (GameHelper.isCollideWith2Circles(player1.position, player1.radius, player2.position, player2.radius)) {
+                    System.out.println("Collide");
+                    snapshot.rollbackPlayer(id1, back);
+                    snapshot.rollbackPlayer(id2, back);
+                    ++back;
+                }
+            }
+        }
     }
 }

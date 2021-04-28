@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Server {
     public final int PORT = 60040;
-    private List<Socket> sockets = new ArrayList<>();
+    private final List<Socket> sockets = new ArrayList<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Server server = new Server();
@@ -17,8 +17,7 @@ public class Server {
     private void connect() throws IOException {
         System.out.println("Server accepting");
         ServerSocket s = new ServerSocket(PORT);
-        int id = 0;
-        while(sockets.size() < 2){
+        while (sockets.size() < 2) {
             Socket socket = s.accept();
             System.out.println("Connect: " + socket);
             sockets.add(socket);

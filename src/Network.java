@@ -7,9 +7,10 @@ import java.util.List;
 
 public class Network {
     public Socket[] sockets;
-    private BufferedReader[] ins;
-    private PrintWriter[] outs;
-    private List<Deque<String>> messageBoxes = new ArrayList<>();
+    private final BufferedReader[] ins;
+    private final PrintWriter[] outs;
+    private final List<String[]> messageBoxes = new ArrayList<>();
+    private final List<Integer> indexes = new ArrayList<>();
 
     Network(Socket[] sockets) throws IOException {
         this.sockets = sockets;
@@ -21,7 +22,9 @@ public class Network {
         }
 
         for (int i = 0; i < sockets.length; ++i) {
-            messageBoxes.add(new ArrayDeque<>());
+            messageBoxes.add(new String[100]);
+            for (int j = 0; j < 100; ++j) messageBoxes.get(i)[j] = "";
+            indexes.add(0);
         }
     }
 
@@ -36,24 +39,30 @@ public class Network {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                messageBoxes.get(id).push(str);
+                messageBoxes.get(id)[indexes.get(id)] = str;
+                indexes.set(id, indexes.get(id) + 1);
+                if (indexes.get(id) == 100) indexes.set(id, 0);
             }
         }).start();
     }
 
-    public String getMessage(int id) {
-        if (messageBoxes.get(id).size() == 0) return "";
-        return messageBoxes.get(id).getFirst();
+    public String getMessage(int id, int back) {
+        int index = indexes.get(id) - 1 - back;
+        if (index < 0) index += 100;
+        return messageBoxes.get(id)[index];
+    }
+
+    public void send(int id, String str) {
+        new Thread(() -> {
+            outs[id].println(str);
+            System.out.println("out: " + "ID: " + id + " " + str);
+        }
+        ).start();
     }
 
     public void sendAll(String str) {
-        for (int i = 0; i < sockets.length; ++i) {
-            final int id = i;
-            new Thread(() -> {
-                outs[id].println(str);
-                System.out.println("out: " + "ID: " + id + " " + str);
-            }
-            ).start();
+        for (int id = 0; id < sockets.length; ++id) {
+            send(id, str);
         }
     }
 }
