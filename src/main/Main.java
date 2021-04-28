@@ -48,6 +48,8 @@ public class Main extends Application {
             gameManager.step();
             gameManager.draw();
 
+            graphic.setFill(Color.WHITE);
+            graphic.fillRect(20, 10, 50, 20);
             graphic.setFill(Color.BLACK);
             graphic.fillText("fps: " + fpsCounter.getFPS(), 20, 20);
         }

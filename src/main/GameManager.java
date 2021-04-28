@@ -25,10 +25,7 @@ public class GameManager {
     public void step() {
         if (snapshot.gameLevel == 2) {
             int horizon = 0, vertical = 0;
-            if (GameHelper.isKeyPushed.getOrDefault(KeyCode.UP, false)) {
-                System.out.println("UPPUPUPUPU");
-                vertical -= 1;
-            }
+            if (GameHelper.isKeyPushed.getOrDefault(KeyCode.UP, false)) vertical -= 1;
             if (GameHelper.isKeyPushed.getOrDefault(KeyCode.DOWN, false)) vertical += 1;
             if (GameHelper.isKeyPushed.getOrDefault(KeyCode.RIGHT, false)) horizon += 1;
             if (GameHelper.isKeyPushed.getOrDefault(KeyCode.LEFT, false)) horizon -= 1;
@@ -40,36 +37,12 @@ public class GameManager {
     }
 
     public void draw() {
-        g.clearRect(0, 0, 640, 480);
+        //g.clearRect(0, 0, 640, 480);
 
         if (snapshot.gameLevel == 1) {
             g.setFill(Color.BLACK);
             g.fillText("COUNTDOWN " + snapshot.countDown, 100, 100);
         } else if (snapshot.gameLevel > 1) {
-            for (int y = 0; y < 480; ++y) {
-                for (int x = 0; x < 640; ++x) {
-                    Color color;
-                    switch (snapshot.stage[y][x]) {
-                        case 0:
-                            color = Color.WHITE;
-                            break;
-                        case 1:
-                            color = Color.BLACK;
-                            break;
-                        case 2:
-                            color = Color.RED;
-                            break;
-                        case 3:
-                            color = Color.BLUE;
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + snapshot.stage[y][x]);
-                    }
-                    g.setFill(color);
-                    g.fillRect(x, y, 1, 1);
-                }
-            }
-
             for (int id = 0; id < player_num; ++id) {
                 Color color;
                 SnapShot.Player player = snapshot.players[id];
@@ -90,7 +63,16 @@ public class GameManager {
                         throw new IllegalStateException("Unexpected value: " + player.color);
                 }
                 g.setFill(color);
-                g.fillOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
+
+                int size = 100;
+                Point2D[] inner_positions = new Point2D[size];
+                for (int i = 0; i < size - 1; ++i)
+                    inner_positions[i] = player.previous_position.add((player.position.subtract(player.previous_position)).multiply(1.0 / (size - 1) * i));
+                inner_positions[size - 1] = player.position;
+
+                for (Point2D position : inner_positions) {
+                    g.fillOval(position.getX(), position.getY(), player.radius * 2, player.radius * 2);
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ public class SnapShot {
     private int myID;
 
     public static class Player {
+        public Point2D previous_position;
         public Point2D position;
         public double radius = 5.0;
         public int color = 2;
@@ -60,16 +61,12 @@ public class SnapShot {
             String[] str = map.get("Position").split(";");
             if (str.length != player_num) System.out.println("ERROR! NOT MATCHING PLAYER NUM!");
             for (int i = 0; i < player_num; ++i) {
+                players[i].previous_position = players[i].position;
                 players[i].position = GameHelper.StringToPoint2D(str[i]);
             }
 
             String stage_str = map.get("Stage");
-            if (stage_str.equals("")) return;
-            for (int y = 0; y < 480; ++y) {
-                for (int x = 0; x < 640; ++x) {
-                    stage[y][x] = Character.getNumericValue(stage_str.charAt(y * 640 + x));
-                }
-            }
+
         }
     }
 

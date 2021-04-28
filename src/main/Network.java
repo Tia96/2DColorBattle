@@ -50,7 +50,7 @@ public class Network {
                         myID = 0;
                         break;
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("Connecting ...");
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException interruptedException) {
