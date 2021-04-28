@@ -11,7 +11,6 @@ public class GameManager {
     private SnapShot snapshot;
 
     private int player_num = 2;
-    private Point2D position = new Point2D(0, 0);
 
     private GameManager() {
     }
@@ -24,6 +23,7 @@ public class GameManager {
 
     public void step() {
         if (snapshot.gameLevel == 2) {
+            Point2D position = snapshot.players[snapshot.myID].position;
             int horizon = 0, vertical = 0;
             if (GameHelper.isKeyPushed.getOrDefault(KeyCode.UP, false)) vertical -= 1;
             if (GameHelper.isKeyPushed.getOrDefault(KeyCode.DOWN, false)) vertical += 1;
@@ -46,22 +46,13 @@ public class GameManager {
             for (int id = 0; id < player_num; ++id) {
                 Color color;
                 SnapShot.Player player = snapshot.players[id];
-                switch (player.color) {
-                    case 0:
-                        color = Color.WHITE;
-                        break;
-                    case 1:
-                        color = Color.BLACK;
-                        break;
-                    case 2:
-                        color = Color.RED;
-                        break;
-                    case 3:
-                        color = Color.BLUE;
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + player.color);
-                }
+                color = switch (player.color) {
+                    case 0 -> Color.WHITE;
+                    case 1 -> Color.BLACK;
+                    case 2 -> Color.RED;
+                    case 3 -> Color.BLUE;
+                    default -> throw new IllegalStateException("Unexpected value: " + player.color);
+                };
                 g.setFill(color);
 
                 int size = 100;

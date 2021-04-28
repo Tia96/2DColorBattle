@@ -13,7 +13,7 @@ public class Main extends Application {
 
     private GameManager gameManager;
     private GraphicsContext graphic;
-    private FPSCounter fpsCounter = new FPSCounter();
+    private final FPSCounter fpsCounter = new FPSCounter();
 
     public static void main(String[] args) {
         launch(args);
