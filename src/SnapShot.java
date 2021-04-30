@@ -2,9 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class SnapShot {
     private final Network network;
@@ -13,9 +11,15 @@ public class SnapShot {
     public int gameLevel = 1;
     private final Type type = new TypeToken<HashMap<String, String>>() {
     }.getType();
+    public StringBuilder updateStage = new StringBuilder();
+    public int[][] conArea;
+    public int[][] invArea;
 
     public static class Player {
+        public int ID;
         public Vector2 position;
+        public List<Vector2> inv_positions = new ArrayList<>();
+        public boolean invading = false;
         public double radius = 5.0;
         public int color = 2;
     }
@@ -25,10 +29,28 @@ public class SnapShot {
         this.player_num = network.sockets.length;
         players = new Player[player_num];
 
+        conArea = new int[480][];
+        invArea = new int[480][];
+        for (int i = 0; i < 480; ++i) {
+            conArea[i] = new int[640];
+            invArea[i] = new int[640];
+        }
+
         Random rand = new Random();
         for (int i = 0; i < player_num; ++i) {
             players[i] = new Player();
             players[i].position = new Vector2(rand.nextInt(640), rand.nextInt(480));
+
+            Vector2 position = players[i].position;
+            for (int y = (int) position.getY() - 50; y <= position.getY() + 50; ++y) {
+                for (int x = (int) position.getX() - 50; x <= position.getX() + 50; ++x) {
+                    if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
+                    conArea[y][x] = i + 1;
+                    updateStage.append("0,").append(x).append(",").append(y).append(",").append(players[i].color).append(";");
+                }
+            }
+
+            players[i].ID = i + 1;
         }
     }
 
@@ -60,12 +82,11 @@ public class SnapShot {
 
         StringBuilder position = new StringBuilder();
         for (int id = 0; id < player_num; ++id) {
-            position.append(players[id].position.getX());
-            position.append(",");
-            position.append(players[id].position.getY());
-            position.append(";");
+            position.append(players[id].position.getX()).append(",").append(players[id].position.getY()).append(";");
         }
         map.put("Position", position.toString());
+
+        map.put("Stage", updateStage.toString());
 
         Gson gson = new Gson();
         String sendData = gson.toJson(map);
@@ -91,11 +112,12 @@ public class SnapShot {
         Gson gson = new Gson();
 
         for (int id = 0; id < player_num; ++id) {
-            map.put("ID", Integer.toString(id));
+            map.put("ID", Integer.toString(id + 1));
             map.put("Player_num", Integer.toString(player_num));
 
             String position = players[id].position.getX() + "," + players[id].position.getY() + ";";
             map.put("Position", position);
+            map.put("Stage", updateStage.toString());
             String sendData = gson.toJson(map);
             network.send(id, sendData);
         }
