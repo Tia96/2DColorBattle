@@ -6,17 +6,19 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.geometry.Point2D;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SnapShot {
     private final Network network;
-    private int player_num;
+    public int player_num;
     public Player[] players;
-    public int[][] stage;
     public int countDown;
     public int gameLevel = 0;
     public int myID;
+    public int[][] conArea;
+    public int[][] invArea;
 
     public static class Player {
         public Point2D previous_position;
@@ -41,38 +43,63 @@ public class SnapShot {
                 players[i] = new Player();
             }
             String str = map.get("Position");
-            players[myID].position = GameHelper.StringToPoint2D(str.substring(0, str.length() - 1));
+            players[myID - 1].position = GameHelper.StringToPoint2D(str.substring(0, str.length() - 1));
+
+            String[] stages = map.get("Stage").split(";");
+            for (String stage_str: stages) {
+                Integer[] details = Arrays.asList(stage_str.split(",")).stream().map(Integer::parseInt).toArray(Integer[]::new);
+                if (details.length != 4) System.out.println("ERROR! NOT MATCHING STAGE SHAPE");
+                int x = details[1], y = details[2], color = details[3];
+                conArea[y][x] = color;
+            }
+
             System.out.println("Connect: " + network.socket + " ID: " + myID);
             network.startReceiveMessage();
         }, Throwable::printStackTrace);
 
         gameLevel = 0;
-        stage = new int[480][];
+        conArea = new int[480][];
+        invArea = new int[480][];
         for (int y = 0; y < 480; ++y) {
             for (int x = 0; x < 640; ++x) {
-                stage[y] = new int[640];
+                conArea[y] = new int[640];
+                invArea[y] = new int[640];
             }
         }
     }
 
     public void getSnapShot() {
         Gson gson = new Gson();
-        String data = network.getMessage();
-        if (data.equals("")) return;
+        String message = network.getMessage();
+        if (message.equals("")) return;
         Type type = new TypeToken<HashMap<String, String>>() {
         }.getType();
-        Map<String, String> map = gson.fromJson(data, type);
+        Map<String, String> map = gson.fromJson(message, type);
 
         gameLevel = Integer.parseInt(map.get("GameLevel"));
 
         if (gameLevel == 1) {
             countDown = Integer.parseInt(map.get("CountDown"));
         } else if (gameLevel == 2) {
-            String[] str = map.get("Position").split(";");
-            if (str.length != player_num) System.out.println("ERROR! NOT MATCHING PLAYER NUM!");
+            String[] positions = map.get("Position").split(";");
+            if (positions.length != player_num) System.out.println("ERROR! NOT MATCHING PLAYER NUM!");
             for (int i = 0; i < player_num; ++i) {
                 players[i].previous_position = players[i].position;
-                players[i].position = GameHelper.StringToPoint2D(str[i]);
+                players[i].position = GameHelper.StringToPoint2D(positions[i]);
+            }
+
+            if (!map.get("Stage").equals("")) {
+                String[] stages = map.get("Stage").split(";");
+                for (String stage_str : stages) {
+                    Integer[] details = Arrays.asList(stage_str.split(",")).stream().map(Integer::parseInt).toArray(Integer[]::new);
+                    if (details.length != 4) System.out.println("ERROR! NOT MATCHING STAGE SHAPE");
+                    int areaType = details[0], x = details[1], y = details[2], color = details[3];
+                    if (areaType == 0) {
+                        conArea[y][x] = color;
+                    } else {
+                        invArea[y][x] = color;
+                    }
+                }
             }
         }
     }

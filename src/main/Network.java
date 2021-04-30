@@ -25,7 +25,9 @@ public class Network {
                     socket.connect(new InetSocketAddress(addr, PORT), 0);
                     in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                    while(!in.ready()) ;
                     String result = in.readLine();
+                    if (in == null) System.out.println("NULLLLLLLLLLLLLLL");
                     emitter.onNext(result);
                     break;
                 } catch (IOException e) {
