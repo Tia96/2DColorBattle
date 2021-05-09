@@ -16,12 +16,19 @@ public class SnapShot {
     public int[][] invArea;
 
     public static class Player {
-        public int ID;
+        public final int ID;
         public Vector2 position;
         public List<Vector2> inv_positions = new ArrayList<>();
         public boolean invading = false;
         public double radius = 5.0;
         public int color = 2;
+
+        Player(int id, Vector2 pos, double radius, int color) {
+            this.ID = id;
+            this.position = pos;
+            this.radius = radius;
+            this.color = color;
+        }
     }
 
     SnapShot(Network network) {
@@ -38,19 +45,15 @@ public class SnapShot {
 
         Random rand = new Random();
         for (int i = 0; i < player_num; ++i) {
-            players[i] = new Player();
-            players[i].position = new Vector2(rand.nextInt(640), rand.nextInt(480));
-
-            Vector2 position = players[i].position;
-            for (int y = (int) position.getY() - 50; y <= position.getY() + 50; ++y) {
-                for (int x = (int) position.getX() - 50; x <= position.getX() + 50; ++x) {
-                    if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                    conArea[y][x] = i + 1;
-                    updateStage.append("0,").append(x).append(",").append(y).append(",").append(players[i].color).append(";");
+            double pi = 2 * Math.PI / player_num * i;
+            Vector2 pos = new Vector2(320 + 200.0 * Math.cos(pi), 240 + 200.0 * Math.sin(pi));
+            System.out.println("Debug: " + pos.getX() + " " + pos.getY());
+            players[i] = new Player(i, pos, 5.0, rand.nextInt(3) + 1);
+            for (int y = (int) pos.getY() - 25; y <= pos.getY() + 25; ++y) {
+                for (int x = (int) pos.getX() - 25; x <= pos.getX() + 25; ++x) {
+                    if (Math.pow(x - pos.getX(), 2) + Math.pow(y - pos.getY(), 2) <= 25 * 25) conArea[y][x] = i;
                 }
             }
-
-            players[i].ID = i + 1;
         }
     }
 
@@ -65,12 +68,12 @@ public class SnapShot {
     public void getSnapShot() {
         if (gameLevel == 2) {
             Gson gson = new Gson();
-            for (int id = 0; id < player_num; ++id) {
-                String data = network.getMessage(id, 0);
+            for (Player player : players) {
+                String data = network.getMessage(player.ID, 0);
                 if (data.equals("")) return;
                 Map<String, String> map = gson.fromJson(data, type);
                 String str = map.get("Position");
-                players[id].position = GameHelper.StringToVector2(str.substring(0, str.length() - 1));
+                player.position = GameHelper.StringToVector2(str.substring(0, str.length() - 1));
             }
         }
     }
@@ -81,12 +84,11 @@ public class SnapShot {
         map.put("GameLevel", Integer.toString(gameLevel));
 
         StringBuilder position = new StringBuilder();
-        for (int id = 0; id < player_num; ++id) {
-            position.append(players[id].position.getX()).append(",").append(players[id].position.getY()).append(";");
+        for (Player player : players) {
+            String x = String.format("%.1f", player.position.getX()), y = String.format("%.1f", player.position.getY());
+            position.append(x).append(",").append(y).append(";");
         }
         map.put("Position", position.toString());
-
-        map.put("Stage", updateStage.toString());
 
         Gson gson = new Gson();
         String sendData = gson.toJson(map);
@@ -111,15 +113,20 @@ public class SnapShot {
         HashMap<String, String> map = new HashMap<>();
         Gson gson = new Gson();
 
-        for (int id = 0; id < player_num; ++id) {
-            map.put("ID", Integer.toString(id + 1));
+        for (Player player : players) {
+            map.put("ID", Integer.toString(player.ID));
             map.put("Player_num", Integer.toString(player_num));
 
-            String position = players[id].position.getX() + "," + players[id].position.getY() + ";";
-            map.put("Position", position);
-            map.put("Stage", updateStage.toString());
+            StringBuilder position = new StringBuilder(), color = new StringBuilder();
+            for (Player player_tmp : players) {
+                String x = String.format("%.1f", player_tmp.position.getX()), y = String.format("%.1f", player_tmp.position.getY());
+                position.append(x).append(",").append(y).append(";");
+                color.append(player_tmp.color).append(";");
+            }
+            map.put("Position", position.toString());
+            map.put("Color", color.toString());
             String sendData = gson.toJson(map);
-            network.send(id, sendData);
+            network.send(player.ID, sendData);
         }
     }
 }

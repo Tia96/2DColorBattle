@@ -1,8 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 public class Network {
@@ -35,7 +33,7 @@ public class Network {
                 try {
                     while (!ins[id].ready()) ;
                     str = ins[id].readLine();
-                    System.out.println("in: " + "ID: " + id + " " + str);
+                    System.out.println("_in: " + "ID: " + id + " " + str);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
