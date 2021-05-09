@@ -27,7 +27,6 @@ public class Network {
                     out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                     while(!in.ready()) ;
                     String result = in.readLine();
-                    if (in == null) System.out.println("NULLLLLLLLLLLLLLL");
                     emitter.onNext(result);
                     break;
                 } catch (IOException e) {
@@ -52,7 +51,7 @@ public class Network {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println("in: " + str);
+                System.out.println("_in: " + str);
                 messageBox.push(str);
             }
         }).start();
@@ -66,7 +65,7 @@ public class Network {
     public void send(String str) {
         new Thread(() -> {
             out.println(str);
-            System.out.println("out: " + " " + str);
+            System.out.println("out: " + str);
         }
         ).start();
     }
