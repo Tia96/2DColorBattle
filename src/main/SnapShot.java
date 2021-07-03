@@ -18,7 +18,7 @@ public class SnapShot {
     public int myID;
     public int[][] conArea;
     public int[][] invArea;
-    public double restTime;
+    public double leftTime;
 
     public static class Player {
         public int ID;
@@ -59,7 +59,7 @@ public class SnapShot {
             myID = Integer.parseInt(map.get("ID"));
             player_num = Integer.parseInt(map.get("Player_num"));
             players = new Player[player_num];
-            restTime = Double.parseDouble(map.get("RestTime"));
+            leftTime = Double.parseDouble(map.get("LeftTime"));
 
             String[] positions = map.get("Position").split(";");
             String[] colors = map.get("Color").split(";");
@@ -110,7 +110,7 @@ public class SnapShot {
                 players[i].position = GameHelper.StringToPoint2D(positions[i]);
                 players[i].score = Double.parseDouble(scores[i]);
             }
-            restTime = Double.parseDouble(map.get("RestTime"));
+            leftTime = Double.parseDouble(map.get("LeftTime"));
         }
     }
 

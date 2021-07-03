@@ -170,7 +170,7 @@ public class GameManager {
             }
 
             g.setFill(Color.BLACK);
-            g.fillText(Double.toString(snapshot.restTime), 100, 200);
+            g.fillText(Double.toString(snapshot.leftTime), 100, 200);
 
             double range = 1.0;
             for (int y = 0; y < 480 / range; ++y) {
