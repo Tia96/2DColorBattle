@@ -62,7 +62,7 @@ public class Network {
         return messageBox.getFirst();
     }
 
-    public void send(String str) {
+    public void sendMessage(String str) {
         new Thread(() -> {
             out.println(str);
             System.out.println("out: " + str);

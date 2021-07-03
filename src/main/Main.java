@@ -29,7 +29,7 @@ public class Main extends Application {
         scene.setOnKeyReleased(GameHelper::keyReleasedHandler);
         graphic = cvs.getGraphicsContext2D();
 
-        stage.setTitle("Splatoon2D");
+        stage.setTitle("2DColorBattle");
         stage.setScene(scene);
         stage.show();
 

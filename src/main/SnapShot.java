@@ -18,6 +18,7 @@ public class SnapShot {
     public int myID;
     public int[][] conArea;
     public int[][] invArea;
+    public double restTime;
 
     public static class Player {
         public int ID;
@@ -26,12 +27,14 @@ public class SnapShot {
         public double radius;
         public Color color;
         public boolean invading;
+        public double score;
 
         Player(int id, Point2D pos, double radius, int color) {
             this.ID = id;
             this.position = pos;
             this.radius = radius;
             this.invading = false;
+            this.score = 0;
 
             this.color = switch (color) {
                 case 0 -> Color.WHITE;
@@ -56,6 +59,7 @@ public class SnapShot {
             myID = Integer.parseInt(map.get("ID"));
             player_num = Integer.parseInt(map.get("Player_num"));
             players = new Player[player_num];
+            restTime = Double.parseDouble(map.get("RestTime"));
 
             String[] positions = map.get("Position").split(";");
             String[] colors = map.get("Color").split(";");
@@ -100,11 +104,13 @@ public class SnapShot {
             countDown = Integer.parseInt(map.get("CountDown"));
         } else if (gameLevel == 2) {
             String[] positions = map.get("Position").split(";");
-            if (positions.length != player_num) System.out.println("ERROR! NOT MATCHING PLAYER NUM!");
+            String[] scores = map.get("Score").split(";");
             for (int i = 0; i < player_num; ++i) {
                 players[i].pre_position = players[i].position;
                 players[i].position = GameHelper.StringToPoint2D(positions[i]);
+                players[i].score = Double.parseDouble(scores[i]);
             }
+            restTime = Double.parseDouble(map.get("RestTime"));
         }
     }
 
@@ -117,6 +123,6 @@ public class SnapShot {
 
         Gson gson = new Gson();
         String sendData = gson.toJson(map);
-        network.send(sendData);
+        network.sendMessage(sendData);
     }
 }

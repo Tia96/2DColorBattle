@@ -2,6 +2,7 @@ package main;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.Bloom;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
@@ -86,6 +87,7 @@ public class GameManager {
             position = position.add(horizon * 4.6, vertical * 4.6);
             snapshot.sendSnapShot(0.0, position);
         }
+
         snapshot.getSnapShot();
 
         if (snapshot.gameLevel == 2) {
@@ -101,8 +103,6 @@ public class GameManager {
                 }
 
                 if (invading) {
-                    System.out.println("INVADING!!!!!!!!!");
-
                     for (int y = (int) player.position.getY(); y <= player.position.getY() + player.radius * 2; ++y) {
                         for (int x = (int) player.position.getX(); x <= player.position.getX() + player.radius * 2; ++x) {
                             if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
@@ -160,11 +160,17 @@ public class GameManager {
         if (snapshot.gameLevel == 1) {
             g.setFill(Color.BLACK);
             g.fillText("COUNTDOWN " + snapshot.countDown, 100, 100);
-        } else if (snapshot.gameLevel > 1) {
+        } else if (snapshot.gameLevel == 2) {
             for (SnapShot.Player player: snapshot.players) {
                 g.setFill(player.color);
                 g.fillOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
+
+                g.setFill(Color.BLACK);
+                g.fillText(Double.toString(player.score), 100 * player.ID, 100);
             }
+
+            g.setFill(Color.BLACK);
+            g.fillText(Double.toString(snapshot.restTime), 100, 200);
 
             double range = 1.0;
             for (int y = 0; y < 480 / range; ++y) {
@@ -173,11 +179,15 @@ public class GameManager {
                         int id = snapshot.conArea[(int)(y * range)][(int)(x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
+                        g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
+                        g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
                     }
                     if (snapshot.invArea[(int)(y * range)][(int)(x * range)] != -1) {
                         int id = snapshot.invArea[(int)(y * range)][(int)(x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
+                        g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
+                        g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
                     }
                 }
             }

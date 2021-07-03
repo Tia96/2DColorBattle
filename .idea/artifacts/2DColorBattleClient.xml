@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="2DColorBattleClient">
+    <output-path>$PROJECT_DIR$/out/artifacts/2DColorBattleClient</output-path>
+    <root id="root">
+      <element id="archive" name="2DColorBattleClient.jar">
+        <element id="module-output" name="2DColorBattleClient" />
+      </element>
+    </root>
+  </artifact>
+</component>
