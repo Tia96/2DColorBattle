@@ -2,7 +2,6 @@ package main;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.Bloom;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
@@ -92,63 +91,67 @@ public class GameManager {
 
         if (snapshot.gameLevel == 2) {
             for (SnapShot.Player player: snapshot.players) {
-                boolean invading = true;
-                for (int y = (int) player.position.getY(); y <= player.position.getY() + player.radius * 2; ++y) {
-                    for (int x = (int) player.position.getX(); x <= player.position.getX() + player.radius * 2; ++x) {
-                        if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                        if (GameHelper.isCollideWithCircleAndRect(new Point2D(player.position.getX() + player.radius, player.position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
-                            if (snapshot.conArea[y][x] == player.ID) invading = false;
-                        }
-                    }
-                }
-
-                if (invading) {
-                    for (int y = (int) player.position.getY(); y <= player.position.getY() + player.radius * 2; ++y) {
-                        for (int x = (int) player.position.getX(); x <= player.position.getX() + player.radius * 2; ++x) {
+                for (Point2D position: player.piledPositions) {
+                    boolean invading = true;
+                    for (int y = (int) position.getY(); y <= position.getY() + player.radius * 2; ++y) {
+                        for (int x = (int) position.getX(); x <= position.getX() + player.radius * 2; ++x) {
                             if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                            if (GameHelper.isCollideWithCircleAndRect(new Point2D(player.position.getX() + player.radius, player.position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
-                                snapshot.invArea[y][x] = player.ID;
+                            if (GameHelper.isCollideWithCircleAndRect(new Point2D(position.getX() + player.radius, position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
+                                if (snapshot.conArea[y][x] == player.ID) invading = false;
                             }
-
                         }
                     }
 
-                    if (!player.invading) {
-                        for (int y = (int)player.pre_position.getY(); y <= player.pre_position.getY() + player.radius * 2; ++y) {
-                            for (int x = (int)player.pre_position.getX(); x <= player.pre_position.getX() + player.radius * 2; ++x) {
+                    if (invading) {
+                        for (int y = (int) position.getY(); y <= position.getY() + player.radius * 2; ++y) {
+                            for (int x = (int) position.getX(); x <= position.getX() + player.radius * 2; ++x) {
                                 if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                                if (GameHelper.isCollideWithCircleAndRect(new Point2D(player.pre_position.getX() + player.radius, player.pre_position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
+                                if (GameHelper.isCollideWithCircleAndRect(new Point2D(position.getX() + player.radius, position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
                                     snapshot.invArea[y][x] = player.ID;
+                                }
+
+                            }
+                        }
+
+                        if (!player.invading) {
+                            for (int y = (int) player.pre_position.getY(); y <= player.pre_position.getY() + player.radius * 2; ++y) {
+                                for (int x = (int) player.pre_position.getX(); x <= player.pre_position.getX() + player.radius * 2; ++x) {
+                                    if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
+                                    if (GameHelper.isCollideWithCircleAndRect(new Point2D(player.pre_position.getX() + player.radius, player.pre_position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
+                                        snapshot.invArea[y][x] = player.ID;
+                                    }
                                 }
                             }
                         }
+
+                        player.invading = true;
                     }
 
-                    player.invading = true;
-                }
+                    if (player.invading && !invading) {
+                        for (int y = (int) position.getY(); y <= position.getY() + player.radius * 2; ++y) {
+                            for (int x = (int) position.getX(); x <= position.getX() + player.radius * 2; ++x) {
+                                if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
+                                if (GameHelper.isCollideWithCircleAndRect(new Point2D(position.getX() + player.radius, position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
+                                    snapshot.invArea[y][x] = player.ID;
+                                }
 
-                if (player.invading && !invading) {
-                    for (int y = (int) player.position.getY(); y <= player.position.getY() + player.radius * 2; ++y) {
-                        for (int x = (int) player.position.getX(); x <= player.position.getX() + player.radius * 2; ++x) {
-                            if (y < 0 || y >= 480 || x < 0 || x >= 640) continue;
-                            if (GameHelper.isCollideWithCircleAndRect(new Point2D(player.position.getX() + player.radius, player.position.getY() + player.radius), player.radius, new Point2D(x, y), new Point2D(1, 1))) {
-                                snapshot.invArea[y][x] = player.ID;
-                            }
-
-                        }
-                    }
-
-                    for (int y = 0; y < 480; ++y) {
-                        for (int x = 0; x < 640; ++x) {
-                            if (snapshot.invArea[y][x] == player.ID) {
-                                snapshot.invArea[y][x] = -1;
-                                snapshot.conArea[y][x] = player.ID;
                             }
                         }
-                    }
-                    fillInside(searchInside(player.position, player.ID), player.ID);
 
-                    player.invading = false;
+                        for (int y = 0; y < 480; ++y) {
+                            for (int x = 0; x < 640; ++x) {
+                                if (snapshot.invArea[y][x] == player.ID) {
+                                    snapshot.invArea[y][x] = -1;
+                                    snapshot.conArea[y][x] = player.ID;
+                                }
+                            }
+                        }
+                        fillInside(searchInside(position, player.ID), player.ID);
+
+                        player.invading = false;
+                    }
+
+                    player.pre_position = position;
                 }
             }
         }

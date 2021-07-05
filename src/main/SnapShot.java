@@ -11,6 +11,8 @@ import java.util.*;
 
 public class SnapShot {
     private final Network network;
+    private final Type type = new TypeToken<HashMap<String, String>>() {
+    }.getType();
     public int player_num;
     public Player[] players;
     public int countDown;
@@ -24,6 +26,7 @@ public class SnapShot {
         public int ID;
         public Point2D pre_position;
         public Point2D position;
+        public ArrayList<Point2D> piledPositions = new ArrayList<>();
         public double radius;
         public Color color;
         public boolean invading;
@@ -32,6 +35,7 @@ public class SnapShot {
         Player(int id, Point2D pos, double radius, int color) {
             this.ID = id;
             this.position = pos;
+            this.pre_position = pos;
             this.radius = radius;
             this.invading = false;
             this.score = 0;
@@ -68,7 +72,7 @@ public class SnapShot {
                 players[i] = new Player(i, pos, 5.0, Integer.parseInt(colors[i]));
                 for (int y = (int) pos.getY() - 25; y <= pos.getY() + 25; ++y) {
                     for (int x = (int) pos.getX() - 25; x <= pos.getX() + 25; ++x) {
-                        if ( Math.pow(x - pos.getX(), 2) + Math.pow(y - pos.getY(), 2) <= 25 * 25) conArea[y][x] = i;
+                        if (Math.pow(x - pos.getX(), 2) + Math.pow(y - pos.getY(), 2) <= 25 * 25) conArea[y][x] = i;
                     }
                 }
             }
@@ -92,12 +96,24 @@ public class SnapShot {
 
     public void getSnapShot() {
         Gson gson = new Gson();
-        String message = network.getMessage();
-        if (message.equals("")) return;
-        Type type = new TypeToken<HashMap<String, String>>() {
-        }.getType();
-        Map<String, String> map = gson.fromJson(message, type);
+        for (int i = 0; i < player_num; ++i) {
+            players[i].piledPositions.clear();
+        }
+        ArrayList<String> messages = network.getMessage();
+        if (messages.isEmpty()) return;
 
+        for (String message: messages) {
+            Map<String, String> messageMap = gson.fromJson(message, type);
+            int tmpGameLevel = Integer.parseInt(messageMap.get("GameLevel"));
+            if (tmpGameLevel == 2) {
+                String[] positions = messageMap.get("Position").split(";");
+                for (int i = 0; i < player_num; ++i) {
+                    players[i].piledPositions.add(GameHelper.StringToPoint2D(positions[i]));
+                }
+            }
+        }
+
+        Map<String, String> map = gson.fromJson(messages.get(messages.size() - 1), type);
         gameLevel = Integer.parseInt(map.get("GameLevel"));
 
         if (gameLevel == 1) {
@@ -106,7 +122,6 @@ public class SnapShot {
             String[] positions = map.get("Position").split(";");
             String[] scores = map.get("Score").split(";");
             for (int i = 0; i < player_num; ++i) {
-                players[i].pre_position = players[i].position;
                 players[i].position = GameHelper.StringToPoint2D(positions[i]);
                 players[i].score = Double.parseDouble(scores[i]);
             }

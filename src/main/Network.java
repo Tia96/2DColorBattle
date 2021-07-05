@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class Network {
@@ -20,7 +21,7 @@ public class Network {
     private BufferedReader in;
     private PrintWriter out;
     private final String[] messageBox;
-    private int index = 0;
+    private int index = 0, befIndex = 0;
 
     Network() {
         try {
@@ -73,17 +74,19 @@ public class Network {
                     e.printStackTrace();
                 }
                 System.out.println("_in: " + str);
-                messageBox[index] = str;
+                messageBox[index % 100] = str;
                 index += 1;
-                if (index == 100) index = 0;
             }
         }).start();
     }
 
-    public String getMessage() {
-        int idx = index - 1;
-        if (idx < 0) idx += 100;
-        return messageBox[idx];
+    public ArrayList<String> getMessage() {
+        ArrayList<String> ret = new ArrayList<>();
+        for (int i = befIndex; i < index; ++i) {
+            ret.add(messageBox[i % 100]);
+        }
+        befIndex = index;
+        return ret;
     }
 
     public void sendMessage(String str) {
