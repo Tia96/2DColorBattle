@@ -21,6 +21,7 @@ public class SnapShot {
     public int[][] conArea;
     public int[][] invArea;
     public double leftTime;
+    public int winner = -1;
 
     public static class Player {
         public int ID;

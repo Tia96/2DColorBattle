@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -43,15 +44,17 @@ public class Main extends Application {
     private class Animation extends AnimationTimer {
         @Override
         public void handle(long now) {
+            graphic.setFill(Color.WHITE);
+            graphic.fillRect(0, 0, 640, 480);
+
             fpsCounter.count_frame();
 
             gameManager.step();
             gameManager.draw();
 
-            graphic.setFill(Color.WHITE);
-            graphic.fillRect(20, 10, 50, 20);
             graphic.setFill(Color.BLACK);
-            graphic.fillText("fps: " + fpsCounter.getFPS(), 20, 20);
+            graphic.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 20));
+            graphic.fillText("fps: " + fpsCounter.getFPS(), 10, 20);
         }
     }
 }

@@ -4,16 +4,21 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 public class GameManager {
     private static final GameManager INSTANCE = new GameManager();
     private GraphicsContext g;
     private SnapShot snapshot;
+    private final long level1StartTime;
 
     private GameManager() {
+        level1StartTime = System.currentTimeMillis();
     }
 
     public static GameManager getInstance(GraphicsContext g, SnapShot snapshot) {
@@ -23,8 +28,8 @@ public class GameManager {
     }
 
     public Point2D searchInside(Point2D center, int id) {
-        for (int y = (int)(center.getY() - 20); y < center.getY() + 20; ++y) {
-            for (int x = (int)(center.getX() - 20); x < center.getX() + 20; ++x) {
+        for (int y = (int) (center.getY() - 20); y < center.getY() + 20; ++y) {
+            for (int x = (int) (center.getX() - 20); x < center.getX() + 20; ++x) {
                 if (snapshot.conArea[y][x] == id) continue;
 
                 int cnt = 0;
@@ -65,7 +70,7 @@ public class GameManager {
         que.push(base);
         while (!que.isEmpty()) {
             Point2D p = que.pop();
-            int x = (int)p.getX(), y = (int)p.getY();
+            int x = (int) p.getX(), y = (int) p.getY();
             if (x < 0 || x >= 640 || y < 0 || y >= 480 || snapshot.conArea[y][x] == id) continue;
             snapshot.conArea[y][x] = id;
             for (int i = 0; i < 4; ++i) {
@@ -90,8 +95,8 @@ public class GameManager {
         snapshot.getSnapShot();
 
         if (snapshot.gameLevel == 2) {
-            for (SnapShot.Player player: snapshot.players) {
-                for (Point2D position: player.piledPositions) {
+            for (SnapShot.Player player : snapshot.players) {
+                for (Point2D position : player.piledPositions) {
                     boolean invading = true;
                     for (int y = (int) position.getY(); y <= position.getY() + player.radius * 2; ++y) {
                         for (int x = (int) position.getX(); x <= position.getX() + player.radius * 2; ++x) {
@@ -154,39 +159,50 @@ public class GameManager {
                     player.pre_position = position;
                 }
             }
+        } else if (snapshot.gameLevel == 3) {
+            if (snapshot.winner == -1) {
+                int index = -1;
+                for (int i = 0; i < snapshot.player_num; ++i) {
+                    if (index == -1 || snapshot.players[i].score > snapshot.players[index].score) index = i;
+                }
+                snapshot.winner = index;
+            }
         }
     }
 
     public void draw() {
         g.clearRect(0, 0, 640, 480);
 
-        if (snapshot.gameLevel == 1) {
+        if (snapshot.gameLevel == 0) {
             g.setFill(Color.BLACK);
-            g.fillText("COUNTDOWN " + snapshot.countDown, 100, 100);
-        } else if (snapshot.gameLevel == 2) {
-            for (SnapShot.Player player: snapshot.players) {
-                g.setFill(player.color);
-                g.fillOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
+            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
+            g.fillText("Connecting", 100, 200);
 
-                g.setFill(Color.BLACK);
-                g.fillText(Double.toString(player.score), 100 * player.ID, 100);
+            for (int i = 0; i < 3; ++i) {
+                if (((System.currentTimeMillis() - level1StartTime) / 1000) % 3 >= i) g.fillText(".", 260 + i * 20, 200);
             }
-
+        } else if (snapshot.gameLevel == 1) {
             g.setFill(Color.BLACK);
-            g.fillText(Double.toString(snapshot.leftTime), 100, 200);
+            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
 
+            if (snapshot.countDown == 0) {
+                g.fillText("Start", 100, 200);
+            } else {
+                g.fillText(Integer.toString(snapshot.countDown), 100, 200);
+            }
+        } else if (snapshot.gameLevel == 2) {
             double range = 1.0;
             for (int y = 0; y < 480 / range; ++y) {
                 for (int x = 0; x < 640 / range; ++x) {
-                    if (snapshot.conArea[(int)(y * range)][(int)(x * range)] != -1) {
-                        int id = snapshot.conArea[(int)(y * range)][(int)(x * range)];
+                    if (snapshot.conArea[(int) (y * range)][(int) (x * range)] != -1) {
+                        int id = snapshot.conArea[(int) (y * range)][(int) (x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
                         g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
                         g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
                     }
-                    if (snapshot.invArea[(int)(y * range)][(int)(x * range)] != -1) {
-                        int id = snapshot.invArea[(int)(y * range)][(int)(x * range)];
+                    if (snapshot.invArea[(int) (y * range)][(int) (x * range)] != -1) {
+                        int id = snapshot.invArea[(int) (y * range)][(int) (x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
                         g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
@@ -194,6 +210,24 @@ public class GameManager {
                     }
                 }
             }
+
+            for (SnapShot.Player player : snapshot.players) {
+                g.setFill(player.color);
+                g.fillOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
+
+                g.setFill(player.color);
+                g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
+                g.fillText(Double.toString(player.score), 100 * player.ID, 20);
+            }
+
+            g.setFill(Color.BLACK);
+            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
+            g.fillText("Time: " +  Math.max(snapshot.leftTime, 0.0), 100, 20);
+
+        } else if (snapshot.gameLevel == 3) {
+            g.setFill(snapshot.players[snapshot.winner].color);
+            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 50));
+            g.fillText("Player" + snapshot.players[snapshot.winner].ID + " WIN", 100, 200);
         }
     }
 }
