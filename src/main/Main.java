@@ -44,9 +44,6 @@ public class Main extends Application {
     private class Animation extends AnimationTimer {
         @Override
         public void handle(long now) {
-            graphic.setFill(Color.WHITE);
-            graphic.fillRect(0, 0, 640, 480);
-
             fpsCounter.count_frame();
 
             gameManager.step();
