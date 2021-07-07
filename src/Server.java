@@ -11,6 +11,7 @@ public class Server {
     private static final String SETTING_FILE_PATH = "resources/settings.properties";
     private static final Properties properties = new Properties();
 
+    private static final int PLAYER_NUM = 3;
     public static int PORT;
     private final List<Socket> sockets = new ArrayList<>();
 
@@ -30,7 +31,7 @@ public class Server {
     private void connect() throws IOException {
         System.out.println("Server accepting. PORT: " + PORT);
         ServerSocket s = new ServerSocket(PORT);
-        while (sockets.size() < 2) {
+        while (sockets.size() < PLAYER_NUM) {
             Socket socket = s.accept();
             System.out.println("Connect: " + socket);
             sockets.add(socket);

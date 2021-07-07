@@ -73,8 +73,8 @@ public class SnapShot {
     }
 
     public void getSnapShot() {
+        Gson gson = new Gson();
         if (gameLevel == 2) {
-            Gson gson = new Gson();
             for (Player player : players) {
                 String data = network.getMessage(player.ID, 0);
                 if (data.equals("")) return;
@@ -88,23 +88,27 @@ public class SnapShot {
 
     public void sendSnapShot(double time) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("Time", Double.toString(time));
-        map.put("GameLevel", Integer.toString(gameLevel));
 
-        StringBuilder position = new StringBuilder();
-        StringBuilder score = new StringBuilder();
-        for (Player player : players) {
-            String x = String.format("%.1f", player.position.getX()), y = String.format("%.1f", player.position.getY());
-            position.append(x).append(",").append(y).append(";");
-            score.append(String.format("%.2f", player.score)).append(";");
+        if (gameLevel == 2) {
+            map.put("Time", Double.toString(time));
+            map.put("GameLevel", Integer.toString(gameLevel));
+
+            StringBuilder position = new StringBuilder();
+            StringBuilder score = new StringBuilder();
+            for (Player player : players) {
+                String x = String.format("%.1f", player.position.getX()), y = String.format("%.1f", player.position.getY());
+                position.append(x).append(",").append(y).append(";");
+                score.append(String.format("%.2f", player.score)).append(";");
+            }
+            map.put("Position", position.toString());
+            map.put("Score", score.toString());
+            map.put("LeftTime", String.format("%.1f", leftTime));
+        } else if (gameLevel == 3) {
+            map.put("GameLevel", Integer.toString(gameLevel));
         }
-        map.put("Position", position.toString());
-        map.put("Score", score.toString());
-        map.put("LeftTime", String.format("%.1f", leftTime));
 
         Gson gson = new Gson();
         String sendData = gson.toJson(map);
-
         network.sendAll(sendData);
     }
 

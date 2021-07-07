@@ -54,10 +54,13 @@ public class GameManager {
     }
 
     private void updateWorld() {
-        updateStage();
-        collidePositions();
-        calcPlayerScore();
-        updateRestTime();
+        if (snapshot.gameLevel == 2) {
+            updateStage();
+            collidePositions();
+            calcPlayerScore();
+            updateRestTime();
+            updateGameLevel();
+        }
     }
 
     private Vector2 searchInside(Vector2 center, int id) {
@@ -207,5 +210,9 @@ public class GameManager {
 
     private void updateRestTime() {
         snapshot.leftTime = snapshot.gameDuration - (System.currentTimeMillis() - snapshot.level2StartTime) / 1000;
+    }
+
+    private void updateGameLevel() {
+        if (snapshot.leftTime <= 0) snapshot.gameLevel = 3;
     }
 }
