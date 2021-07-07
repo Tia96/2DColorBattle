@@ -15,6 +15,7 @@ public class GameManager {
     private static final GameManager INSTANCE = new GameManager();
     private GraphicsContext g;
     private SnapShot snapshot;
+    private final String fontPath = "resource/SourceHanSans-Normal.otf";
     private final long level1StartTime;
 
     private GameManager() {
@@ -175,21 +176,19 @@ public class GameManager {
 
         if (snapshot.gameLevel == 0) {
             g.setFill(Color.BLACK);
-            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
+            g.setFont(new Font(fontPath, 30));
             g.fillText("Connecting", 100, 200);
 
             for (int i = 0; i < 3; ++i) {
-                if (((System.currentTimeMillis() - level1StartTime) / 1000) % 3 >= i) g.fillText(".", 260 + i * 20, 200);
+                if (((System.currentTimeMillis() - level1StartTime) / 1000) % 3 >= i)
+                    g.fillText(".", 260 + i * 20, 200);
             }
         } else if (snapshot.gameLevel == 1) {
             g.setFill(Color.BLACK);
-            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
+            g.setFont(new Font(fontPath, 30));
 
-            if (snapshot.countDown == 0) {
-                g.fillText("Start", 100, 200);
-            } else {
-                g.fillText(Integer.toString(snapshot.countDown), 100, 200);
-            }
+            g.setFont(new Font(fontPath, 100));
+            g.fillText(Integer.toString(snapshot.countDown), 300, 250);
         } else if (snapshot.gameLevel == 2) {
             double range = 1.0;
             for (int y = 0; y < 480 / range; ++y) {
@@ -198,15 +197,15 @@ public class GameManager {
                         int id = snapshot.conArea[(int) (y * range)][(int) (x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
-                        g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
-                        g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
+                        //g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
+                        //g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
                     }
                     if (snapshot.invArea[(int) (y * range)][(int) (x * range)] != -1) {
                         int id = snapshot.invArea[(int) (y * range)][(int) (x * range)];
                         g.setFill(snapshot.players[id].color);
                         g.fillRect(x * range, y * range, range, range);
-                        g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
-                        g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
+                        //g.setFill(new Color(snapshot.players[id].color.getRed(), snapshot.players[id].color.getGreen(), snapshot.players[id].color.getBlue(), 0.3));
+                        //g.fillRect(x * range - range * 2, y * range - range * 2, range * 5, range * 5);
                     }
                 }
             }
@@ -214,19 +213,21 @@ public class GameManager {
             for (SnapShot.Player player : snapshot.players) {
                 g.setFill(player.color);
                 g.fillOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
+                g.setFill(Color.BLACK);
+                g.strokeOval(player.position.getX(), player.position.getY(), player.radius * 2, player.radius * 2);
 
                 g.setFill(player.color);
-                g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
-                g.fillText(Double.toString(player.score), 100 * player.ID, 20);
+                g.setFont(new Font(fontPath, 20));
+                g.fillText(player.ID + ": " + player.score + "%", 10, 50 + 30 * player.ID);
             }
 
             g.setFill(Color.BLACK);
-            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 30));
-            g.fillText("Time: " +  Math.max(snapshot.leftTime, 0.0), 100, 20);
+            g.setFont(new Font(fontPath, 20));
+            g.fillText("Time: " + Math.max(snapshot.leftTime, 0.0), 100, 20);
 
         } else if (snapshot.gameLevel == 3) {
             g.setFill(snapshot.players[snapshot.winner].color);
-            g.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 50));
+            g.setFont(new Font(fontPath, 50));
             g.fillText("Player" + snapshot.players[snapshot.winner].ID + " WIN", 100, 200);
         }
     }

@@ -50,7 +50,7 @@ public class Main extends Application {
             gameManager.draw();
 
             graphic.setFill(Color.BLACK);
-            graphic.setFont(new Font("resources/SourceHanSansJP-Normal.otf", 20));
+            graphic.setFont(new Font("resources/SourceHanSans-Normal.otf", 20));
             graphic.fillText("fps: " + fpsCounter.getFPS(), 10, 20);
         }
     }

@@ -43,9 +43,9 @@ public class SnapShot {
 
             this.color = switch (color) {
                 case 0 -> Color.WHITE;
-                case 1 -> Color.BLACK;
-                case 2 -> Color.RED;
-                case 3 -> Color.BLUE;
+                case 1 -> new Color(0.400, 0.733, 0.415, 1.0);
+                case 2 -> new Color(0.898, 0.223, 0.207, 1.0);
+                case 3 -> new Color(0.258, 0.647, 0.960, 1.0);
                 default -> throw new IllegalStateException("Unexpected value: " + color);
             };
         }
